@@ -89,6 +89,13 @@ const deriveYear = (period: string): number => {
 const ensureDate = (year: number, month: number): Date =>
   new Date(year, Math.max(0, month - 1), 1);
 
+const withBase = (path: string): string => {
+  const base = import.meta.env.BASE_URL ?? '/';
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+  const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${normalizedBase}${normalizedPath}`;
+};
+
 const buildMeta = (records: DataRecord[]): Pick<DataModel, 'byGroup' | 'bySeries' | 'groups' | 'series' | 'years' | 'months'> => {
   const byGroup = new Map<string, DataRecord[]>();
   const bySeries = new Map<string, DataRecord[]>();
@@ -154,7 +161,7 @@ export const loadData = async (): Promise<DataModel> => {
     return cache;
   }
 
-  cache = csv<RawRecord>('data/alcohol.csv').then((rows) => {
+  cache = csv<RawRecord>(withBase('data/alcohol.csv')).then((rows) => {
     const records: DataRecord[] = rows
       .map((row) => {
         const period = row['Period'] ?? '';
